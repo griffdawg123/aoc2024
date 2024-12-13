@@ -1,3 +1,4 @@
+use std::default;
 use std::fs;
 use std::env;
 
@@ -47,43 +48,32 @@ fn part2(input: Vec<&str>) -> i64 {
         let sections: Vec<&str> = line.split(":").collect();
         let result: i64 = sections[0].parse().unwrap();
         let input_vals: Vec<i64> = sections[1].split(" ").filter(|x| !x.is_empty()).map(|x| x.parse().unwrap()).collect();
-        let max_bitmask = 2_i64.pow(2 * (input_vals.len() as u32 - 1));
-        for combination in 0..max_bitmask {
-            let mut value: i64 = input_vals[0].into();
-            let mut test = 3;
-            for number in 1..input_vals.len() {
-                if value > result {
-                    break;
-                }
-                if combination & test == 0 {
-                    value += input_vals[number];
-                } else if (combination & test) >> ((number - 1)*2) == 1 {
-                    value *= input_vals[number];
-                } else if (combination & test) >> ((number - 1)*2) == 2 {
-                    value *= 10;
-                    value += input_vals[number];
-                }
-
-                test = test << 2;
-            }
-            if value == result {
-                res += result;
-                //print!("{}",input_vals[0]);
-                //for number in 1..input_vals.len() {
-                //    let test = 3 << ((number - 1) * 2);
-                //    if combination & test == 0 {
-                //        print!("+");
-                //    } else if (combination & test) >> (number - 1)*2 == 1 {
-                //        print!("*");
-                //    } else if (combination & test) >> (number - 1)*2 == 2 {
-                //        print!("||");
-                //    }
-                //    print!("{}", input_vals[number]);
-                //}
-                //println!(" = {}", result);
-                break;
-            }
+        if let (true, _) = find_combination(result, input_vals[0], input_vals[1..].to_vec()) { 
+            res += result;
         }
     }
     return res;
+}
+
+fn find_combination(result: i64, value: i64, rest: Vec<i64>) -> (bool, i64) {
+    if rest.is_empty() {
+        return (result == value, value);
+    }
+    if value > result {
+        return (false, -1);
+    }
+    if let (true, x) = find_combination(result, value + rest[0], rest[1..].to_vec()) {
+        return (true, x);
+    }
+    if let (true, x) = find_combination(result, value * rest[0], rest[1..].to_vec()) {
+        return (true, x);
+    }
+    let v_string = value.to_string();
+    let rest_string = rest[0].to_string();
+    let concat_string = v_string + &rest_string;
+    let concat_val: i64 = concat_string.parse().unwrap();
+    if let (true, x) = find_combination(result, concat_val, rest[1..].to_vec()) {
+        return (true, x);
+    }
+    return (false, -1);
 }
