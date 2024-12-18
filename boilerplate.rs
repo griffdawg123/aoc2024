@@ -18,3 +18,16 @@ fn part2(input: Vec<&str>) -> i32 {
     let mut res = 0;
     return res;
 }
+
+#[cfg(test)]
+mod tests {
+
+    use std::fs;
+    use super::*;
+
+    #[test]
+    fn sanity() {
+        let res = 2 + 2;
+        assert_eq!(res, 4);
+    }
+}
